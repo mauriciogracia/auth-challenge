@@ -8,12 +8,13 @@ This repository contains the architecture specification and targeted implementat
 
 ```
 ├── docs/
-│   ├── part-1-specs.md                                         # Part 1: Full Architecture & Design Specification (1-3 pages)
-│   ├── tech-specs.md                                           # Engineering standards (Single-return, DRY, SOLID, ACID, Resilience)
-│   ├── notes.md                                                # Architecture decisions & notes log
-│   └── Senior Developer, Collaborate - Take-Home Test...pdf    # Original exercise prompt
+│   ├── part-1-specs.md                                         # Part 1: Full Architecture & Design Specification (5 sections)
+│   ├── notes.md                                                # Engineering decision log & business context
+│   ├── tech-specs.md                                           # Engineering standards (SOLID, ACID, Polly Resilience)
+│   ├── Senior Developer, Collaborate - Take-Home Test.md       # Original exercise prompt (Markdown)
+│   └── Senior Developer, Collaborate - Take-Home Test.pdf      # Original exercise prompt (PDF)
 ├── src/
-│   └── Collaborate.Auth.Api/                                   # ASP.NET Core Web API (Part 2 Implementation)
+│   └── Collaborate.Auth.Api/                                   # ASP.NET Core 8 Web API (Part 2 Implementation)
 │       ├── Controllers/
 │       │   ├── TokenController.cs                              # POST /oauth/token (RFC 8693 Token Exchange)
 │       │   └── DownstreamSamplesController.cs                  # Protected downstream API (Notifications/Docs)
@@ -24,10 +25,12 @@ This repository contains the architecture specification and targeted implementat
 │       │   └── SecurityConstants.cs                            # Standard grant types, token types, claims
 │       ├── Services/
 │       │   ├── IPermissionStore.cs                             # Data Abstraction Layer (DAL)
-│       │   ├── FastPermissionStore.cs                          # Thread-safe fast store with policy evaluation
+│       │   ├── FastPermissionStore.cs                          # Thread-safe store with policy evaluation
 │       │   ├── ITokenExchangeService.cs                        # Token exchange contract
 │       │   └── TokenExchangeService.cs                         # RFC 8693 OBO Token Exchange engine
-│       ├── Program.cs                                          # DI container & JWT authentication setup
+│       ├── Program.cs                                          # DI container, JWT authentication & Swagger setup
+│       ├── Properties/
+│       │   └── launchSettings.json                             # Root Swagger UI launch configuration
 │       └── appsettings.json
 ├── tests/
 │   └── Collaborate.Auth.Tests/                                 # Unit & Integration Tests (xUnit + WebApplicationFactory)
@@ -114,9 +117,9 @@ dotnet test
 
 ---
 
-## 📌 Architecture & Design Highlights
+## 📌 Architecture & Documentation Index
 
-- **Specification**: [docs/part-1-specs.md](docs/part-1-specs.md) covers the complete 5-section architecture design document.
-- **Engineering Standards**: [docs/tech-specs.md](docs/tech-specs.md) covers code construction, SOLID principles, ACID guarantees, and resilience patterns.
-- **Decision Notes**: [docs/notes.md](docs/notes.md) contains architectural decisions and trade-offs.
-
+- **[docs/part-1-specs.md](docs/part-1-specs.md)**: Full Architecture & Design Specification covering the 5 prompt areas (High-Level Architecture, Implementation Plan, Testing Strategy, Evaluation & Observability, Failure Modes & Tradeoffs).
+- **[docs/notes.md](docs/notes.md)**: Engineering Decision Log explaining the business context of Collaborate and the technical "why" behind each architectural decision.
+- **[docs/tech-specs.md](docs/tech-specs.md)**: Engineering Standards covering SOLID principles, ACID transactional guarantees, Polly circuit breakers, and non-blocking I/O.
+- **[docs/Senior Developer, Collaborate - Take-Home Test.md](docs/Senior%20Developer,%20Collaborate%20-%20Take-Home%20Test.md)**: Original take-home problem description and evaluation guidelines.
