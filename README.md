@@ -9,6 +9,7 @@ This repository contains the architecture specification and targeted implementat
 ```
 ├── docs/
 │   ├── part-1-specs.md                                         # Part 1: Full Architecture & Design Specification (1-3 pages)
+│   ├── tech-specs.md                                           # Engineering standards (Single-return, DRY, SOLID, ACID, Resilience)
 │   ├── notes.md                                                # Architecture decisions & notes log
 │   └── Senior Developer, Collaborate - Take-Home Test...pdf    # Original exercise prompt
 ├── src/
@@ -19,7 +20,7 @@ This repository contains the architecture specification and targeted implementat
 │       ├── Models/
 │       │   ├── TokenExchangeRequest.cs                         # RFC 8693 Request schema
 │       │   ├── TokenExchangeResponse.cs                        # RFC 8693 Response schema
-│       │   ├── EntitlementModels.cs                            # Context & delegation result models
+│       │   ├── EntitlementModels.cs                            # CollaborateUser, ClientApplication, DelegationDecision
 │       │   └── SecurityConstants.cs                            # Standard grant types, token types, claims
 │       ├── Services/
 │       │   ├── IPermissionStore.cs                             # Data Abstraction Layer (DAL)
@@ -87,3 +88,14 @@ dotnet test
 - ✅ **Instant Revocation:** Immediate failure of token exchange for deactivated users.
 - ✅ **End-to-End Pipeline:** Full `WebApplicationFactory` integration testing verifying downstream audience validation and audit logging.
 
+---
+
+## 🤖 Context & Handoff for Next Agent / Developer
+
+If you are picking up this codebase:
+- **Status:** Both Part 1 (Design Document) and Part 2 (Code Implementation) are **100% complete and fully passing (8/8 tests)**.
+- **Key Specifications:**
+  - `docs/part-1-specs.md`: The submission design document covering the 5 required sections.
+  - `docs/tech-specs.md`: Technical standards detailing single-return flow, DRY, SOLID, ACID, and resilience.
+  - `docs/notes.md`: Chronological log of architectural decisions.
+- **Git State:** Step 1 (`docs/part-1-specs.md`, `docs/notes.md`) is committed. The remaining code files are staged/unstaged for step-by-step committing as desired by the user. Do not run git operations unless explicitly requested by the user.
