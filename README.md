@@ -43,7 +43,7 @@ This repository contains the architecture specification and targeted implementat
 
 ## 🚀 Part 1: Architecture & Design Summary
 
-The full architecture specification is documented in [docs/part-1-specs.md](docs/part-1-specs.md).
+The full architecture specification is documented in <a href="docs/part-1-specs.md" target="_blank" rel="noopener noreferrer">docs/part-1-specs.md</a>.
 
 Key highlights:
 - **Authentication & Federation:** Email-first Home Realm Discovery (`/api/v1/auth/discovery`) routing internal staff to Caseware Central IdP and external client users to federated SAML/OIDC IdPs via Auth Code + PKCE.
@@ -71,7 +71,7 @@ Implementation of **Option C: On-Behalf-Of (OBO) Token Exchange Endpoint** using
 ## 🧪 Building, Running & Testing
 
 ### Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- <a href="https://dotnet.microsoft.com/download/dotnet/8.0" target="_blank" rel="noopener noreferrer">.NET 8.0 SDK</a>
 
 ### 1. Build the Solution
 ```bash
@@ -83,9 +83,9 @@ dotnet build
 dotnet run --project src/Collaborate.Auth.Api
 ```
 When started, the API automatically serves the **interactive Swagger UI as the root landing page**:
-- **HTTP**: [http://localhost:5032/](http://localhost:5032/)
-- **HTTPS**: [https://localhost:7020/](https://localhost:7020/)
-- **Health Check**: [http://localhost:5032/health](http://localhost:5032/health)
+- **HTTP**: <a href="http://localhost:5032/" target="_blank" rel="noopener noreferrer">http://localhost:5032/</a>
+- **HTTPS**: <a href="https://localhost:7020/" target="_blank" rel="noopener noreferrer">https://localhost:7020/</a>
+- **Health Check**: <a href="http://localhost:5032/health" target="_blank" rel="noopener noreferrer">http://localhost:5032/health</a>
 
 #### 🎮 Testing Interactively in Swagger UI:
 1. **Exchange a Token (`POST /oauth/token`)**:
@@ -119,7 +119,7 @@ dotnet test
 
 ## 📌 Architecture & Documentation Index
 
-- **[docs/part-1-specs.md](docs/part-1-specs.md)**: Full Architecture & Design Specification covering the 5 prompt areas (High-Level Architecture, Implementation Plan, Testing Strategy, Evaluation & Observability, Failure Modes & Tradeoffs).
-- **[docs/notes.md](docs/notes.md)**: Engineering Decision Log explaining the business context of Collaborate and the technical "why" behind each architectural decision.
-- **[docs/tech-specs.md](docs/tech-specs.md)**: Engineering Standards covering SOLID principles, ACID transactional guarantees, Polly circuit breakers, and non-blocking I/O.
-- **[docs/Senior Developer, Collaborate - Take-Home Test.md](docs/Senior%20Developer,%20Collaborate%20-%20Take-Home%20Test.md)**: Original take-home problem description and evaluation guidelines.
+- <a href="docs/part-1-specs.md" target="_blank" rel="noopener noreferrer"><strong>docs/part-1-specs.md</strong></a>: Full Architecture & Design Specification covering the 5 prompt areas (High-Level Architecture, Implementation Plan, Testing Strategy, Evaluation & Observability, Failure Modes & Tradeoffs).
+- <a href="docs/notes.md" target="_blank" rel="noopener noreferrer"><strong>docs/notes.md</strong></a>: Engineering Decision Log explaining the business context of Collaborate and the technical "why" behind each architectural decision.
+- <a href="docs/tech-specs.md" target="_blank" rel="noopener noreferrer"><strong>docs/tech-specs.md</strong></a>: Engineering Standards covering SOLID principles, ACID transactional guarantees, Polly circuit breakers, and non-blocking I/O.
+- <a href="docs/Senior%20Developer,%20Collaborate%20-%20Take-Home%20Test.md" target="_blank" rel="noopener noreferrer"><strong>docs/Senior Developer, Collaborate - Take-Home Test.md</strong></a>: Original take-home problem description and evaluation guidelines.
