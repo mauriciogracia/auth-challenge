@@ -30,3 +30,4 @@ public interface IPermissionStore
         IEnumerable<string>? requestedScopes,
         CancellationToken cancellationToken = default);
 }
+
