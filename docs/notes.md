@@ -115,3 +115,22 @@
     $$\text{Effective Scope} = \text{User Permissions } (C) \cap \text{Caller Delegation Entitlements } (A) \cap \text{Token Scope}$$
   - **Audit Trail Preservation:** Both `sub` and `act.sub` are written to access/audit logs so security teams know which service acted on whose behalf.
 
+## 6. Implementation Strategy & Cloud Parity
+
+- **Local-to-Cloud Environment Parity:**
+  - Container-first design: Architecture runs identically locally in Docker as in AWS cloud containers.
+  - Multi-container setup: Dedicated container for Redis and dedicated container for the ASP.NET Core API.
+  - Cloud mapping: Local Docker Compose translates directly to AWS ECS/Fargate (tasks) + AWS ElastiCache for Redis in staging/prod.
+  - 12-Factor configuration: Environment variables govern Dev vs. Staging vs. Prod settings (Redis endpoints, JWT signing keys/JWKS URLs, IdP endpoints).
+
+- **TDD & Test Strategy Emphasis:**
+  - Test-Driven Development (TDD) and integration testing prioritized.
+  - Specific focus on testing **Scenario C (On-Behalf-Of Token Exchange)**:
+    - Verifying subject vs. actor claim attribution.
+    - Scope narrowing & audience restrictions.
+    - Confused deputy protection tests.
+  - Dedicated tests for **rapid sub-second permission revocation**:
+    - Validating instant cache eviction upon role removal.
+    - Ensuring immediate failure on subsequent requests without token expiry delay.
+
+
