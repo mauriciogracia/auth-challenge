@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // 1. Dependency Injection: Data Abstraction Layer & Core Services
-builder.Services.AddSingleton<IPermissionStore, InMemoryPermissionStore>();
+builder.Services.AddSingleton<IPermissionStore, FastPermissionStore>();
 builder.Services.AddSingleton<ITokenExchangeService, TokenExchangeService>();
+
 
 // 2. Authentication & JWT Bearer Configuration
 var issuer = builder.Configuration["Auth:Issuer"] ?? "https://auth.collaborate.caseware.com";

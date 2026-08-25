@@ -23,7 +23,7 @@ This repository contains the architecture specification and targeted implementat
 │       │   └── SecurityConstants.cs                            # Standard grant types, token types, claims
 │       ├── Services/
 │       │   ├── IPermissionStore.cs                             # Data Abstraction Layer (DAL)
-│       │   ├── InMemoryPermissionStore.cs                      # Thread-safe in-memory store with policy evaluation
+│       │   ├── FastPermissionStore.cs                          # Thread-safe fast store with policy evaluation
 │       │   ├── ITokenExchangeService.cs                        # Token exchange contract
 │       │   └── TokenExchangeService.cs                         # RFC 8693 OBO Token Exchange engine
 │       ├── Program.cs                                          # DI container & JWT authentication setup

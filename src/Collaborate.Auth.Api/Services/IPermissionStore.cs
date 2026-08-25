@@ -3,26 +3,26 @@ using Collaborate.Auth.Api.Models;
 namespace Collaborate.Auth.Api.Services;
 
 /// <summary>
-/// Data Abstraction Layer for querying user permissions, client delegation entitlements,
-/// and evaluating effective scopes across multi-tier caching and backing storage.
+/// Data Abstraction Layer for querying users, client applications,
+/// and evaluating delegation decisions across multi-tier caching and backing storage.
 /// </summary>
 public interface IPermissionStore
 {
     /// <summary>
-    /// Retrieves the current subject context (roles, scopes, active status) for a user.
+    /// Retrieves the user record and their active permissions.
     /// </summary>
-    Task<UserSubjectContext?> GetUserSubjectAsync(string userId, string firmId, CancellationToken cancellationToken = default);
+    Task<CollaborateUser?> GetUserAsync(string userId, string firmId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves the registered calling client's delegation permissions and allowed audiences.
+    /// Retrieves the registered client application configuration.
     /// </summary>
-    Task<CallingClientContext?> GetCallingClientAsync(string clientId, CancellationToken cancellationToken = default);
+    Task<ClientApplication?> GetClientAppAsync(string clientId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Evaluates delegation entitlements and computes the effective intersection of scopes:
-    /// Effective Scope = User Permissions ∩ Caller Delegation Entitlements ∩ Requested Scope
+    /// Evaluates delegation rules and computes the effective intersection of scopes:
+    /// Effective Scope = User Permissions ∩ Client Delegation Scopes ∩ Requested Scope
     /// </summary>
-    Task<DelegationEvaluationResult> EvaluateDelegationAsync(
+    Task<DelegationDecision> EvaluateDelegationAsync(
         string userId,
         string firmId,
         string callingClientId,
@@ -30,4 +30,3 @@ public interface IPermissionStore
         IEnumerable<string>? requestedScopes,
         CancellationToken cancellationToken = default);
 }
-
