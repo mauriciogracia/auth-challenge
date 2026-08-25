@@ -206,7 +206,7 @@ sequenceDiagram
 
 ### 1.4 On-Behalf-Of (OBO) Delegation & Confused Deputy Prevention
 
-When an internal service (Comments) calls a downstream API (Notifications) on behalf of a user, or when an external firm system calls Collaborate on behalf of an employee, we use **OAuth 2.0 Token Exchange (RFC 8693)** to eliminate the Confused Deputy problem.
+When an internal service (Comments) calls a downstream API (Notifications) on behalf of a user, or when an external firm system calls Collaborate on behalf of an employee, the architecture utilizes **OAuth 2.0 Token Exchange (RFC 8693)** to eliminate the Confused Deputy problem.
 
 ```mermaid
 sequenceDiagram
@@ -266,9 +266,9 @@ gantt
 ```
 
 ### 2.1 Local & Cloud Setup
-- **Docker Compose for Local Dev:** Runs ASP.NET Core API, Redis Alpine, and a relational DB container.
-- **12-Factor Environment Configuration:** The same container images run in Dev, Staging, and Production. Settings are governed by environment variables (`REDIS__CONNECTION_STRING`, `AUTH__ISSUER_URL`, etc.).
-- **AWS Target:** Containers run on **AWS ECS Fargate** behind an ALB, and Redis runs on **AWS ElastiCache for Redis** (Multi-AZ with automatic failover).
+- **Production Target (Docker & Cloud Containers):** In a production enterprise deployment, the architecture utilizes multi-container Docker images (ASP.NET Core API, Redis Alpine, and relational database) deploying to **AWS ECS Fargate** behind an Application Load Balancer, with distributed caching on **AWS ElastiCache for Redis** (Multi-AZ).
+- **12-Factor Environment Configuration:** Container images run identically across Dev, Staging, and Production, configured dynamically via environment variables (`REDIS__CONNECTION_STRING`, `AUTH__ISSUER_URL`, etc.).
+- **Take-Home Exercise Scope:** For the purpose of this challenge submission, physical Dockerfiles and container compose manifests have been intentionally omitted in favor of direct `.NET 8 SDK` execution (`dotnet run`, `dotnet test`) and fast, in-memory data store implementations to ensure immediate, zero-dependency local evaluation.
 
 ### 2.2 Rollout Phases
 1. **Phase 1 (Foundation):** ASP.NET Core solution skeleton, container definitions, and configuration binding.

@@ -53,7 +53,7 @@ Key highlights:
 
 ## 🛠️ Part 2: Targeted Implementation (Option C)
 
-We implemented **Option C: On-Behalf-Of (OBO) Token Exchange Endpoint** using standard ASP.NET Core 8 primitives:
+Implementation of **Option C: On-Behalf-Of (OBO) Token Exchange Endpoint** using standard ASP.NET Core 8 primitives:
 
 ### Key Features:
 1. **RFC 8693 Compliance:** `POST /oauth/token` handling `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`.
@@ -65,17 +65,41 @@ We implemented **Option C: On-Behalf-Of (OBO) Token Exchange Endpoint** using st
 
 ---
 
-## 🧪 Building & Running Tests
+## 🧪 Building, Running & Testing
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-### Build Solution
+### 1. Build the Solution
 ```bash
 dotnet build
 ```
 
-### Run Test Suite
+### 2. Run API & Access Swagger UI
+```bash
+dotnet run --project src/Collaborate.Auth.Api
+```
+When started, the API automatically serves the **interactive Swagger UI as the root landing page**:
+- **HTTP**: [http://localhost:5032/](http://localhost:5032/)
+- **HTTPS**: [https://localhost:7020/](https://localhost:7020/)
+- **Health Check**: [http://localhost:5032/health](http://localhost:5032/health)
+
+#### 🎮 Testing Interactively in Swagger UI:
+1. **Exchange a Token (`POST /oauth/token`)**:
+   - Send `grant_type`: `urn:ietf:params:oauth:grant-type:token-exchange`
+   - Send `subject_token`: Valid user JWT (or test token minted for `usr_auditor_01`)
+   - Send `audience`: `https://api.caseware.com/notifications`
+   - Send `scope`: `notifications:write`
+   - Send `actor_token`: `service_collaborate_comments`
+   - Click **Execute** $\rightarrow$ Receive down-scoped downstream JWT with `act` claims.
+2. **Authorize Swagger**:
+   - Click the **Authorize** 🔓 button at the top right of Swagger UI.
+   - Enter `Bearer <downstream_access_token>`.
+3. **Call Protected Resource (`POST /api/notifications`)**:
+   - Execute with payload `{ "content": "Audit comment posted" }`.
+   - Returns `200 OK` showing subject attribution (`usr_auditor_01`) and actor logging (`service_collaborate_comments`).
+
+### 3. Run Automated Test Suite
 ```bash
 dotnet test
 ```

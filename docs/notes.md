@@ -16,6 +16,8 @@
     - Scope-down and narrow audience/permissions for downstream calls.
     - Prevent the "confused deputy" vulnerability.
     - Preserve subject identity and actor attribution (`act` claim) for audit logs.
+  - Interactive API Documentation:
+    - Swagger (OpenAPI) configured at application root (`/`) for interactive token exchange testing and downstream Bearer authentication.
 
 ## 3. Authentication & Federation Flow Design
 
@@ -118,10 +120,9 @@
 ## 6. Implementation Strategy & Cloud Parity
 
 - **Local-to-Cloud Environment Parity:**
-  - Container-first design: Architecture runs identically locally in Docker as in AWS cloud containers.
-  - Multi-container setup: Dedicated container for Redis and dedicated container for the ASP.NET Core API.
-  - Cloud mapping: Local Docker Compose translates directly to AWS ECS/Fargate (tasks) + AWS ElastiCache for Redis in staging/prod.
+  - Production container-first design: Architecture targets multi-container deployments (ASP.NET Core API + Redis Alpine + SQL DB) deploying to AWS ECS Fargate + AWS ElastiCache for Redis.
   - 12-Factor configuration: Environment variables govern Dev vs. Staging vs. Prod settings (Redis endpoints, JWT signing keys/JWKS URLs, IdP endpoints).
+  - Scope Note: For this take-home exercise, container configurations are specified architecturally, while local execution runs directly via .NET 8 SDK and in-memory stores for instant zero-dependency testing.
 
 - **TDD & Test Strategy Emphasis:**
   - Test-Driven Development (TDD) and integration testing prioritized.
