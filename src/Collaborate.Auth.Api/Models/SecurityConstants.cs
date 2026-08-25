@@ -1,10 +1,8 @@
 namespace Collaborate.Auth.Api.Models;
 
-/// <summary>
-/// Centralized OAuth 2.0 and RFC 8693 Token Exchange constants.
-/// Keeps claim names, grant types, and error strings consistent across the service.
-/// </summary>
+// Standard OAuth 2.0 & RFC 8693 strings in one spot so we don't scatter magic strings or typos around.
 public static class SecurityConstants
+
 {
     public static class GrantTypes
     {
@@ -49,3 +47,4 @@ public static class SecurityConstants
         public const string InvalidTarget = "invalid_target";
     }
 }
+

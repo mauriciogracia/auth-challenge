@@ -27,3 +27,4 @@ public sealed record DelegationDecision(
     bool IsAllowed,
     string? FailureReason,
     IReadOnlySet<string> EffectiveScopes);
+
