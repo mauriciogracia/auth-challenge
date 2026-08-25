@@ -133,4 +133,46 @@
     - Validating instant cache eviction upon role removal.
     - Ensuring immediate failure on subsequent requests without token expiry delay.
 
+## 7. Observability & Evaluation (DataDog Integration)
+
+- **Evaluation Targets & SLAs:**
+  - Authorization Throughput: $\ge 10,000$ checks/sec per cluster.
+  - Latency: L1 Cache $< 1\text{ms}$ ($p99$), L2 Redis $< 5\text{ms}$ ($p99$), DB fallback $< 50\text{ms}$ ($p99$).
+  - Cache Hit Ratio: $\ge 98\%$ combined L1/L2.
+  - Revocation Propagation: $< 1.0\text{s}$ across all stateless API nodes and WebSocket hubs.
+
+- **DataDog APM & Tracing:**
+  - W3C distributed trace propagation across all OBO microservice calls.
+  - Spans tagged with `actor.service`, `subject.user_id`, `token.audience`, and `tenant_id`.
+
+- **DataDog Structured Logging & Dashboards:**
+  - Standardized JSON audit logging for all authorization evaluations and token exchanges.
+## 8. Data Abstraction Layer & Failure Handling
+
+- **Data Abstraction Layer Pattern (`IPermissionStore`):**
+  - ASP.NET Core controllers and middleware never talk directly to Redis or raw SQL.
+  - All calls go through a centralized abstraction service (`IPermissionStore` / `IAuthorizationCacheService`).
+  - Encapsulates multi-tier resolution: L1 (`IMemoryCache`) -> L2 (Redis) -> SQL Database (EF Core / Relational).
+- **Redis Outage & Backup Plan:**
+  - If Redis cluster fails or network partitions, the abstraction layer catches exceptions via circuit breaker / Polly policy.
+  - Automatically degrades to querying the local SQL database directly to keep the platform operational.
+  - Logs warnings to Datadog and emits health status metrics (`collaborate.redis.status = degraded`).
+- **Dropped Message Resilience:**
+  - Short L1 sliding TTL (30–60s) ensures eventual consistency if a Pub/Sub message is dropped.
+- **Fail-Closed Security Posture:**
+  - If both Redis and DB are unreachable for a check, the system defaults to Deny (`403 Forbidden`).
+
+## 9. Clean Architecture, Decoupled Asynchronous Design & Horizontal Scaling
+
+- **Clean Architecture & Separation of Concerns:**
+  - Strict isolation: Domain (Entitlement models, value objects) $\rightarrow$ Application (Token Exchange, Policies) $\rightarrow$ Infrastructure (Redis, SQL, Upstream IdP HTTP Clients) $\rightarrow$ Presentation (ASP.NET Core Controllers & Middlewares).
+- **Fully Asynchronous Non-Blocking Pipeline:**
+  - 100% `async` / `await` throughout ASP.NET Core request pipelines, preventing thread pool starvation under 10k+ req/sec load.
+  - Event-driven cache invalidation via Redis Pub/Sub channels to decouple write-paths from read-path caching.
+- **Stateless Multi-Instance Images & Horizontal Autoscaling:**
+  - API container images are completely stateless and containerized for zero-friction horizontal scaling on AWS ECS Fargate or Kubernetes.
+  - No sticky sessions required; any node can service any request or handle any token verification.
+
+
+
 
