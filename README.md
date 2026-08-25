@@ -90,12 +90,9 @@ dotnet test
 
 ---
 
-## 🤖 Context & Handoff for Next Agent / Developer
+## 📌 Architecture & Design Highlights
 
-If you are picking up this codebase:
-- **Status:** Both Part 1 (Design Document) and Part 2 (Code Implementation) are **100% complete and fully passing (8/8 tests)**.
-- **Key Specifications:**
-  - `docs/part-1-specs.md`: The submission design document covering the 5 required sections.
-  - `docs/tech-specs.md`: Technical standards detailing single-return flow, DRY, SOLID, ACID, and resilience.
-  - `docs/notes.md`: Chronological log of architectural decisions.
-- **Git State:** Step 1 (`docs/part-1-specs.md`, `docs/notes.md`) is committed. The remaining code files are staged/unstaged for step-by-step committing as desired by the user. Do not run git operations unless explicitly requested by the user.
+- **Specification**: [docs/part-1-specs.md](docs/part-1-specs.md) covers the complete 5-section architecture design document.
+- **Engineering Standards**: [docs/tech-specs.md](docs/tech-specs.md) covers code construction, SOLID principles, ACID guarantees, and resilience patterns.
+- **Decision Notes**: [docs/notes.md](docs/notes.md) contains architectural decisions and trade-offs.
+

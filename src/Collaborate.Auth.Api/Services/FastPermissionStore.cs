@@ -38,7 +38,6 @@ public sealed class FastPermissionStore : IPermissionStore
         IEnumerable<string>? requestedScopes,
         CancellationToken cancellationToken = default)
     {
-        // 1. Verify User exists and is active
         var userKey = $"{firmId}:{userId}";
         if (!_users.TryGetValue(userKey, out var user) || !user.IsActive)
         {
@@ -48,7 +47,6 @@ public sealed class FastPermissionStore : IPermissionStore
                 EffectiveScopes: new HashSet<string>()));
         }
 
-        // 2. Verify Calling Client Application exists and can impersonate
         if (!_clients.TryGetValue(callingClientId, out var client) || !client.CanImpersonate)
         {
             return Task.FromResult(new DelegationDecision(
@@ -57,7 +55,7 @@ public sealed class FastPermissionStore : IPermissionStore
                 EffectiveScopes: new HashSet<string>()));
         }
 
-        // 3. Verify Target Audience is permitted for this client application (Confused Deputy protection)
+        // Prevent confused deputy: ensure caller is authorized to target this downstream audience
         if (!client.AllowedAudiences.Contains(targetAudience) && !client.AllowedAudiences.Contains("*"))
         {
             return Task.FromResult(new DelegationDecision(
@@ -66,7 +64,7 @@ public sealed class FastPermissionStore : IPermissionStore
                 EffectiveScopes: new HashSet<string>()));
         }
 
-        // 4. Compute Effective Scope: User Scopes ∩ Client Delegation Scopes ∩ Requested Scopes
+        // Intersect user permissions with caller delegation allowances and optional requested scope
         var requestedSet = requestedScopes != null && requestedScopes.Any()
             ? new HashSet<string>(requestedScopes, StringComparer.OrdinalIgnoreCase)
             : null;
@@ -87,7 +85,6 @@ public sealed class FastPermissionStore : IPermissionStore
                 EffectiveScopes: new HashSet<string>()));
         }
 
-        // If specific scopes were requested, ensure caller did not attempt privilege escalation
         if (requestedSet != null && !requestedSet.IsSubsetOf(availableScopes))
         {
             return Task.FromResult(new DelegationDecision(

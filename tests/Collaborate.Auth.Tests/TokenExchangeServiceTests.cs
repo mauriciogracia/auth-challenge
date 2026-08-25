@@ -30,7 +30,7 @@ public class TokenExchangeServiceTests
     [Fact]
     public async Task ExchangeTokenAsync_ValidScenarioB_MintsDownScopedTokenWithActorClaim()
     {
-        // Arrange: User posts a comment, Comment Service requests OBO token for Notification API
+        // User posts a comment; Comment Service requests OBO token for Notification API
         var userSubjectToken = _tokenExchangeService.CreateSubjectToken(
             userId: "usr_auditor_01",
             firmId: "firm_caseware",
@@ -51,16 +51,14 @@ public class TokenExchangeServiceTests
             new Claim(SecurityConstants.Claims.ClientId, "service_collaborate_comments")
         }));
 
-        // Act
         var result = await _tokenExchangeService.ExchangeTokenAsync(request, callerPrincipal);
 
-        // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Response);
         Assert.False(string.IsNullOrWhiteSpace(result.Response.AccessToken));
         Assert.Equal("notifications:write", result.Response.Scope);
 
-        // Inspect minted JWT claims
+        // Verify minted JWT claims and RFC 8693 actor attribution
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(result.Response.AccessToken);
 
@@ -68,7 +66,6 @@ public class TokenExchangeServiceTests
         Assert.Equal("https://api.caseware.com/notifications", jwt.Audiences.First());
         Assert.Equal("firm_caseware", jwt.Claims.First(c => c.Type == SecurityConstants.Claims.FirmId).Value);
 
-        // Check Actor Claim (RFC 8693)
         var actorClaim = jwt.Claims.FirstOrDefault(c => c.Type == SecurityConstants.Claims.Actor);
         Assert.NotNull(actorClaim);
         Assert.Contains("service_collaborate_comments", actorClaim.Value);
@@ -77,7 +74,7 @@ public class TokenExchangeServiceTests
     [Fact]
     public async Task ExchangeTokenAsync_ConfusedDeputyAttack_RejectsUnauthorizedAudience()
     {
-        // Arrange: Comment service tries to exchange user token for Financial Data API (which it is NOT entitled to target)
+        // Comment service attempts to exchange token for Financial Data API without permission
         var userSubjectToken = _tokenExchangeService.CreateSubjectToken(
             userId: "usr_auditor_01",
             firmId: "firm_caseware",
@@ -89,7 +86,7 @@ public class TokenExchangeServiceTests
             GrantType = SecurityConstants.GrantTypes.TokenExchange,
             SubjectToken = userSubjectToken,
             SubjectTokenType = SecurityConstants.TokenTypes.AccessToken,
-            Audience = "https://api.caseware.com/financial-data", // Unauthorized audience for Comments Service
+            Audience = "https://api.caseware.com/financial-data",
             Scope = "financial:read"
         };
 
@@ -98,10 +95,8 @@ public class TokenExchangeServiceTests
             new Claim(SecurityConstants.Claims.ClientId, "service_collaborate_comments")
         }));
 
-        // Act
         var result = await _tokenExchangeService.ExchangeTokenAsync(request, callerPrincipal);
 
-        // Assert: Mitigates Confused Deputy
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
         Assert.Equal(SecurityConstants.Errors.UnauthorizedClient, result.Error.Error);
@@ -111,7 +106,7 @@ public class TokenExchangeServiceTests
     [Fact]
     public async Task ExchangeTokenAsync_ScopeEscalation_RejectsWhenScopeExceedsAllowedEntitlements()
     {
-        // Arrange: User has only documents:read, but caller requests documents:write
+        // User has only documents:read, caller requests documents:write
         var userSubjectToken = _tokenExchangeService.CreateSubjectToken(
             userId: "usr_client_external",
             firmId: "firm_external_audit",
@@ -124,7 +119,7 @@ public class TokenExchangeServiceTests
             SubjectToken = userSubjectToken,
             SubjectTokenType = SecurityConstants.TokenTypes.AccessToken,
             Audience = "https://api.caseware.com/collaborate",
-            Scope = "documents:write" // User only has documents:read
+            Scope = "documents:write"
         };
 
         var callerPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
@@ -132,10 +127,8 @@ public class TokenExchangeServiceTests
             new Claim(SecurityConstants.Claims.ClientId, "client_firm_integration")
         }));
 
-        // Act
         var result = await _tokenExchangeService.ExchangeTokenAsync(request, callerPrincipal);
 
-        // Assert
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
         Assert.Equal(SecurityConstants.Errors.UnauthorizedClient, result.Error.Error);
@@ -144,7 +137,6 @@ public class TokenExchangeServiceTests
     [Fact]
     public async Task ExchangeTokenAsync_RevokedUser_FailsImmediately()
     {
-        // Arrange: User was removed/deactivated in store
         _permissionStore.RevokeUser("usr_auditor_01", "firm_caseware");
 
         var userSubjectToken = _tokenExchangeService.CreateSubjectToken(
@@ -167,10 +159,8 @@ public class TokenExchangeServiceTests
             new Claim(SecurityConstants.Claims.ClientId, "service_collaborate_comments")
         }));
 
-        // Act
         var result = await _tokenExchangeService.ExchangeTokenAsync(request, callerPrincipal);
 
-        // Assert
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
         Assert.Contains("deactivated/revoked", result.Error.ErrorDescription);
@@ -179,7 +169,7 @@ public class TokenExchangeServiceTests
     [Fact]
     public async Task ExchangeTokenAsync_ValidScenarioA_ExternalClientToCollaborate_MintsScopedToken()
     {
-        // Arrange: External automated integration calls on behalf of an employee to pull data
+        // External automated integration calling Collaborate on behalf of an employee
         var userSubjectToken = _tokenExchangeService.CreateSubjectToken(
             userId: "usr_client_external",
             firmId: "firm_external_audit",
@@ -200,10 +190,8 @@ public class TokenExchangeServiceTests
             new Claim(SecurityConstants.Claims.ClientId, "client_firm_integration")
         }));
 
-        // Act
         var result = await _tokenExchangeService.ExchangeTokenAsync(request, callerPrincipal);
 
-        // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Response);
         Assert.Equal("engagements:read", result.Response.Scope);

@@ -31,7 +31,6 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
     [Fact]
     public async Task PostTokenEndpoint_FormUrlEncoded_PerformsValidTokenExchange()
     {
-        // 1. Arrange: Mint a valid subject token via DI service
         using var scope = _factory.Services.CreateScope();
         var tokenService = scope.ServiceProvider.GetRequiredService<ITokenExchangeService>() as TokenExchangeService;
         Assert.NotNull(tokenService);
@@ -52,10 +51,7 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
             { "actor_token", "service_collaborate_comments" }
         };
 
-        // 2. Act: Call POST /oauth/token
         var response = await _client.PostAsync("/oauth/token", new FormUrlEncodedContent(formData));
-
-        // 3. Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
@@ -64,7 +60,7 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
         Assert.Equal("Bearer", body.TokenType);
         Assert.Equal("notifications:write", body.Scope);
 
-        // 4. Act 2: Use the exchanged downstream token against the protected downstream Notification API
+        // Call the downstream Notification API using the newly exchanged token
         var downstreamRequest = new HttpRequestMessage(HttpMethod.Post, "/api/notifications")
         {
             Content = JsonContent.Create(new { Content = "New comment posted by auditor" })
@@ -72,9 +68,8 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
         downstreamRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", body.AccessToken);
 
         var downstreamResponse = await _client.SendAsync(downstreamRequest);
-
-        // 5. Assert: Downstream endpoint accepts the token and validates audience/scopes
         Assert.Equal(HttpStatusCode.OK, downstreamResponse.StatusCode);
+
         var json = await downstreamResponse.Content.ReadAsStringAsync();
         Assert.Contains("usr_auditor_01", json);
         Assert.Contains("service_collaborate_comments", json);
@@ -83,7 +78,6 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
     [Fact]
     public async Task DownstreamEndpoint_WithMismatchedAudience_RejectsRequest()
     {
-        // 1. Arrange: Mint a token intended strictly for 'collaborate' API
         using var scope = _factory.Services.CreateScope();
         var tokenService = scope.ServiceProvider.GetRequiredService<ITokenExchangeService>() as TokenExchangeService;
         Assert.NotNull(tokenService);
@@ -94,19 +88,13 @@ public class TokenExchangeIntegrationTests : IClassFixture<WebApplicationFactory
             userType: "firm_staff",
             scopes: new[] { "notifications:write" });
 
-        // 2. Act: Attempt to send this token to the Notification API endpoint (which requires audience https://api.caseware.com/notifications)
         var downstreamRequest = new HttpRequestMessage(HttpMethod.Post, "/api/notifications")
         {
             Content = JsonContent.Create(new { Content = "Replay attack payload" })
         };
         downstreamRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", wrongAudienceToken);
 
-        // We simulate a strict audience validation handler by creating a client with targeted validation
-        // In our setup, valid audiences are checked by JWT middleware
         var downstreamResponse = await _client.SendAsync(downstreamRequest);
-
-        // The default audience in the subject token was collaborate, which is accepted by the combined gateway
-        // but if missing required scopes or wrong claims it handles properly
         Assert.True(downstreamResponse.StatusCode == HttpStatusCode.OK || downstreamResponse.StatusCode == HttpStatusCode.Forbidden || downstreamResponse.StatusCode == HttpStatusCode.Unauthorized);
     }
 }

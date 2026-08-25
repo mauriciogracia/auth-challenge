@@ -35,7 +35,6 @@ public sealed class TokenExchangeService : ITokenExchangeService
         ClaimsPrincipal? callerPrincipal,
         CancellationToken cancellationToken = default)
     {
-        // 1. Validate Grant Type (RFC 8693 Section 2.1)
         if (!string.Equals(request.GrantType, SecurityConstants.GrantTypes.TokenExchange, StringComparison.Ordinal))
         {
             return new TokenExchangeResult(
@@ -48,7 +47,6 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 2. Validate Subject Token
         if (string.IsNullOrWhiteSpace(request.SubjectToken))
         {
             return new TokenExchangeResult(
@@ -61,7 +59,6 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 3. Validate Target Audience
         if (string.IsNullOrWhiteSpace(request.Audience))
         {
             return new TokenExchangeResult(
@@ -74,7 +71,7 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 4. Parse and Validate incoming Subject Token (using standard ASP.NET Core token validation)
+        // Validate the incoming subject token signature and expiration
         ClaimsPrincipal subjectPrincipal;
         try
         {
@@ -82,7 +79,7 @@ public sealed class TokenExchangeService : ITokenExchangeService
             {
                 ValidateIssuer = true,
                 ValidIssuer = _issuer,
-                ValidateAudience = false, // Subject token might have a different audience than target
+                ValidateAudience = false, // Subject token was issued for Collaborate API, not the downstream service
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = _signingKey,
                 ValidateLifetime = true,
@@ -103,7 +100,6 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 5. Extract Subject Claims
         var userId = subjectPrincipal.FindFirst(SecurityConstants.Claims.Subject)?.Value
                      ?? subjectPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var firmId = subjectPrincipal.FindFirst(SecurityConstants.Claims.FirmId)?.Value
@@ -123,18 +119,17 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 6. Determine Calling Client ID
+        // Identify the caller requesting delegation
         var callingClientId = callerPrincipal?.FindFirst(SecurityConstants.Claims.ClientId)?.Value
                               ?? callerPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                              ?? request.ActorToken // Fallback for client credentials / actor token
+                              ?? request.ActorToken
                               ?? "service_collaborate_comments";
 
-        // 7. Parse requested scopes if provided
         var requestedScopes = !string.IsNullOrWhiteSpace(request.Scope)
             ? request.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries)
             : null;
 
-        // 8. Evaluate Delegation against Data Abstraction Layer (IPermissionStore)
+        // Evaluate user status, client impersonation rights, and scope intersections
         var delegation = await _permissionStore.EvaluateDelegationAsync(
             userId: userId,
             firmId: firmId,
@@ -155,7 +150,7 @@ public sealed class TokenExchangeService : ITokenExchangeService
                 });
         }
 
-        // 9. Mint Down-Scoped Downstream JWT with Actor Claim
+        // Mint down-scoped downstream token with actor attribution
         var downstreamJwt = MintDownstreamToken(
             userId: userId,
             firmId: firmId,
